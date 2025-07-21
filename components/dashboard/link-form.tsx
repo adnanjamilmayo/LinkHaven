@@ -11,21 +11,56 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Plus } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
+import { 
+  FaGlobe, 
+  FaTwitter, 
+  FaInstagram, 
+  FaLinkedin, 
+  FaYoutube, 
+  FaTiktok, 
+  FaFacebook, 
+  FaGithub, 
+  FaEnvelope, 
+  FaPhone, 
+  FaWhatsapp, 
+  FaTelegram,
+  FaLink
+} from "react-icons/fa"
 
 const iconOptions = [
-  { value: "globe", label: "🌐 Website" },
-  { value: "twitter", label: "🐦 Twitter" },
-  { value: "instagram", label: "📷 Instagram" },
-  { value: "linkedin", label: "💼 LinkedIn" },
-  { value: "youtube", label: "📺 YouTube" },
-  { value: "tiktok", label: "🎵 TikTok" },
-  { value: "facebook", label: "📘 Facebook" },
-  { value: "github", label: "💻 GitHub" },
-  { value: "email", label: "✉️ Email" },
-  { value: "phone", label: "📞 Phone" },
-  { value: "whatsapp", label: "💬 WhatsApp" },
-  { value: "telegram", label: "✈️ Telegram" },
+  { value: "linkhaven", label: "LinkHaven", icon: FaLink },
+  { value: "globe", label: "Website", icon: FaGlobe },
+  { value: "twitter", label: "Twitter", icon: FaTwitter },
+  { value: "instagram", label: "Instagram", icon: FaInstagram },
+  { value: "linkedin", label: "LinkedIn", icon: FaLinkedin },
+  { value: "youtube", label: "YouTube", icon: FaYoutube },
+  { value: "tiktok", label: "TikTok", icon: FaTiktok },
+  { value: "facebook", label: "Facebook", icon: FaFacebook },
+  { value: "github", label: "GitHub", icon: FaGithub },
+  { value: "email", label: "Email", icon: FaEnvelope },
+  { value: "phone", label: "Phone", icon: FaPhone },
+  { value: "whatsapp", label: "WhatsApp", icon: FaWhatsapp },
+  { value: "telegram", label: "Telegram", icon: FaTelegram },
 ]
+
+const getIconColor = (iconValue: string) => {
+  const colorMap: Record<string, string> = {
+    twitter: "#1DA1F2",
+    instagram: "#E4405F",
+    linkedin: "#0077B5",
+    youtube: "#FF0000",
+    tiktok: "#000000",
+    facebook: "#1877F2",
+    github: "#181717",
+    whatsapp: "#25D366",
+    telegram: "#0088CC",
+    email: "#EA4335",
+    phone: "#34A853",
+    globe: "#4285F4",
+    linkhaven: "#6366F1",
+  }
+  return colorMap[iconValue] || "#6B7280"
+}
 
 interface LinkFormProps {
   pageId: string
@@ -101,17 +136,23 @@ export function LinkForm({ pageId, link, trigger }: LinkFormProps) {
           </div>
           <div className="space-y-2">
             <Label htmlFor="icon">Icon (Optional)</Label>
-            <Select name="icon" defaultValue={link?.icon || "globe"}>
+            <Select name="icon" defaultValue={link?.icon || "linkhaven"}>
               <SelectTrigger>
                 <SelectValue placeholder="Choose an icon" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="globe">No icon</SelectItem>
-                {iconOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
+                {iconOptions.map((option) => {
+                  const IconComponent = option.icon
+                  const iconColor = getIconColor(option.value)
+                  return (
+                    <SelectItem key={option.value} value={option.value}>
+                      <div className="flex items-center gap-2">
+                        <IconComponent className="w-4 h-4" style={{ color: iconColor }} />
+                        <span>{option.label}</span>
+                      </div>
+                    </SelectItem>
+                  )
+                })}
               </SelectContent>
             </Select>
           </div>

@@ -25,14 +25,22 @@ export async function requireAuth() {
 
 export async function getUserProfile(userId: string) {
   const supabase = await createServerClient()
-  const { data: profile } = await supabase.from("user_profiles").select("*").eq("id", userId).single()
+  const { data: profile, error } = await supabase.from("user_profiles").select("*").eq("id", userId as any).single()
+
+  if (error || !profile) {
+    return null
+  }
 
   return profile
 }
 
 export async function getUserPage(userId: string) {
   const supabase = await createServerClient()
-  const { data: page } = await supabase.from("pages").select("*").eq("user_id", userId).single()
+  const { data: page, error } = await supabase.from("pages").select("*").eq("user_id", userId as any).single()
+
+  if (error || !page) {
+    return null
+  }
 
   return page
 }

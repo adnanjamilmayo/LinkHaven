@@ -10,9 +10,14 @@ export default async function DashboardLayout({
   const user = await requireAuth()
   const page = await getUserPage(user.id)
 
+  // Handle case where page doesn't exist yet
+  const username = page && typeof page === "object" && "username" in page 
+    ? (page as any).username 
+    : "user";
+
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gradient-to-br dark:from-gray-900 dark:via-gray-800 dark:to-gray-950">
-      <Sidebar username={page?.username} className="dark:bg-gray-900 dark:border-gray-800" />
+    <div className="flex h-screen bg-gray-50 dark:bg-background">
+      <Sidebar username={username} />
       <main className="flex-1 overflow-auto">{children}</main>
     </div>
   )

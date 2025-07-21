@@ -10,31 +10,43 @@ export default async function DashboardPage() {
   const user = await requireAuth()
   const profile = await getUserProfile(user.id)
   const page = await getUserPage(user.id)
+
+  if (!page || typeof page !== "object" || !("id" in page) || !("username" in page)) {
+    return <div>Error loading page data</div>;
+  }
+  
+  // Type assertion to tell TypeScript page is valid
+  const validPage = page as { id: string; username: string };
+  const validProfile = profile as any;
+  
   const supabase = await createServerClient()
 
   // Get analytics data
-  const { data: analytics } = await supabase
+  const { data: analytics, error: analyticsError } = await supabase
     .from("analytics")
     .select("views")
-    .eq("page_id", page?.id || "")
+    .eq("page_id", validPage.id as any)
 
-  const { data: links } = await supabase
+  const { data: links, error: linksError } = await supabase
     .from("links")
     .select("click_count")
-    .eq("page_id", page?.id || "")
+    .eq("page_id", validPage.id as any)
 
-  const totalViews = analytics?.reduce((sum, day) => sum + day.views, 0) || 0
-  const totalClicks = links?.reduce((sum, link) => sum + link.click_count, 0) || 0
-  const totalLinks = links?.length || 0
+  if (analyticsError || !Array.isArray(analytics)) return <div>Error loading analytics</div>;
+  if (linksError || !Array.isArray(links)) return <div>Error loading links</div>;
+
+  const totalViews = (analytics as any).reduce((sum: number, day: any) => sum + day.views, 0) || 0
+  const totalClicks = (links as any).reduce((sum: number, link: any) => sum + link.click_count, 0) || 0
+  const totalLinks = (links as any).length || 0
 
   return (
     <div className="p-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Welcome back, {profile?.full_name || "User"}!</h1>
-        <p className="text-gray-600 mt-2">Here's an overview of your LinkHaven page performance</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Welcome back, {validProfile?.full_name || "User"}!</h1>
+        <p className="text-gray-600 dark:text-gray-300 mt-2">Here's an overview of your LinkHaven page performance</p>
       </div>
 
-      {!page ? (
+      {!validPage ? (
         <Card className="mb-8">
           <CardHeader>
             <CardTitle>Get Started</CardTitle>
@@ -112,7 +124,7 @@ export default async function DashboardPage() {
                   <Link href="/dashboard/profile">Edit Profile</Link>
                 </Button>
                 <Button className="w-full bg-transparent" variant="outline" asChild>
-                  <Link href={`/${page.username}`} target="_blank">
+                  <Link href={`/${validPage.username}`} target="_blank">
                     View Public Page
                   </Link>
                 </Button>
@@ -125,10 +137,10 @@ export default async function DashboardPage() {
                 <CardDescription>Share your LinkHaven page</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="bg-gray-50 p-3 rounded-md mb-3">
-                  <code className="text-sm">linkhaven.vercel.app/{page.username}</code>
+                <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-md mb-3">
+                  <code className="text-sm text-gray-900 dark:text-gray-100">linkhaven.app/{validPage.username}</code>
                 </div>
-                <CopyLinkButton link={`linkhaven.vercel.app/${page.username}`} />
+                <CopyLinkButton link={`linkhaven.app/${validPage.username}`} />
               </CardContent>
             </Card>
           </div>

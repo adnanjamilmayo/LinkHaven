@@ -1,8 +1,23 @@
-import type { Database } from "@/lib/supabase/types"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ExternalLink } from "lucide-react"
 import Link from "next/link"
+import type { Database } from "@/lib/supabase/types"
+import { 
+  FaGlobe, 
+  FaTwitter, 
+  FaInstagram, 
+  FaLinkedin, 
+  FaYoutube, 
+  FaTiktok, 
+  FaFacebook, 
+  FaGithub, 
+  FaEnvelope, 
+  FaPhone, 
+  FaWhatsapp, 
+  FaTelegram,
+  FaLink
+} from "react-icons/fa"
 
 type Page = Database["public"]["Tables"]["pages"]["Row"]
 type LinkType = Database["public"]["Tables"]["links"]["Row"]
@@ -14,22 +29,59 @@ interface BioPageProps {
   profile: Profile
 }
 
-const getIconEmoji = (icon: string | null) => {
-  const iconMap: Record<string, string> = {
-    globe: "🌐",
-    twitter: "🐦",
-    instagram: "📷",
-    linkedin: "💼",
-    youtube: "📺",
-    tiktok: "🎵",
-    facebook: "📘",
-    github: "💻",
-    email: "✉️",
-    phone: "📞",
-    whatsapp: "💬",
-    telegram: "✈️",
+const getIconComponent = (icon: string | null) => {
+  const iconMap: Record<string, any> = {
+    linkhaven: FaLink,
+    globe: FaGlobe,
+    twitter: FaTwitter,
+    instagram: FaInstagram,
+    linkedin: FaLinkedin,
+    youtube: FaYoutube,
+    tiktok: FaTiktok,
+    facebook: FaFacebook,
+    github: FaGithub,
+    email: FaEnvelope,
+    phone: FaPhone,
+    whatsapp: FaWhatsapp,
+    telegram: FaTelegram,
   }
-  return icon ? iconMap[icon] || "🔗" : "🔗"
+  return icon ? iconMap[icon] || FaLink : FaLink
+}
+
+const getIconColor = (icon: string | null) => {
+  const colorMap: Record<string, string> = {
+    twitter: "#1DA1F2",
+    instagram: "#E4405F",
+    linkedin: "#0077B5",
+    youtube: "#FF0000",
+    tiktok: "#000000",
+    facebook: "#1877F2",
+    github: "#181717",
+    whatsapp: "#25D366",
+    telegram: "#0088CC",
+    email: "#EA4335",
+    phone: "#34A853",
+    globe: "#4285F4",
+    linkhaven: "#6366F1",
+  }
+  return colorMap[icon || ""] || "#6B7280"
+}
+
+const renderIcon = (icon: string | null) => {
+  const IconComponent = getIconComponent(icon)
+  const iconColor = getIconColor(icon)
+  
+  if (icon === "linkhaven") {
+    return (
+      <img 
+        src="/placeholder-logo.svg" 
+        alt="LinkHaven" 
+        className="w-8 h-4 object-contain"
+      />
+    )
+  }
+  
+  return <IconComponent className="w-6 h-6" style={{ color: iconColor }} />
 }
 
 const getTemplateStyles = (template: string) => {
@@ -102,7 +154,9 @@ export function BioPage({ page, links, profile }: BioPageProps) {
             >
               <Card className={`${styles.card} hover:shadow-2xl hover:scale-[1.03] transition-all duration-200 cursor-pointer rounded-2xl border-0`}>
                 <CardContent className="p-5 flex items-center gap-4">
-                  <span className="text-2xl bg-white/70 rounded-full p-2 shadow-sm border border-gray-200">{getIconEmoji(link.icon)}</span>
+                  <div className="bg-white/70 rounded-full p-2 shadow-sm border border-gray-200 flex items-center justify-center w-10 h-10">
+                    {renderIcon(link.icon)}
+                  </div>
                   <span className="font-semibold text-gray-900 text-lg flex-1">{link.title}</span>
                   <ExternalLink className="h-5 w-5 text-gray-400" />
                 </CardContent>

@@ -11,41 +11,34 @@ export default async function LinksPage() {
   const page = await getUserPage(user.id)
   const supabase = await createServerClient()
 
-  if (!page) {
-    return (
-      <div className="p-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Create Your Page First</CardTitle>
-            <CardDescription>You need to create your bio page before adding links</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button asChild>
-              <Link href="/dashboard/profile">Create Your Page</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    )
+  if (!page || typeof page !== "object" || !("id" in page)) {
+    return <div>Error loading page data</div>;
   }
 
-  const { data: links } = await supabase
+  // Type assertion to tell TypeScript page is valid
+  const validPage = page as { id: string; username: string };
+
+  const { data: links, error: linksError } = await supabase
     .from("links")
     .select("*")
-    .eq("page_id", page.id)
+    .eq("page_id", validPage.id as any)
     .order("sort_order", { ascending: true })
+
+  if (linksError || !Array.isArray(links)) {
+    return <div>Error loading links</div>;
+  }
 
   return (
     <div className="p-8">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Manage Links</h1>
-          <p className="text-gray-600 mt-2">Add, edit, and organize your links</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Manage Links</h1>
+          <p className="text-gray-600 dark:text-gray-300 mt-2">Add, edit, and organize your links</p>
         </div>
-        <LinkForm pageId={page.id} />
+        <LinkForm pageId={validPage.id} />
       </div>
 
-      <LinkList links={links || []} pageId={page.id} />
+      <LinkList links={links as any} pageId={validPage.id} />
     </div>
   )
 }

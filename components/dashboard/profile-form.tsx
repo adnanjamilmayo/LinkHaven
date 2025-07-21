@@ -119,8 +119,8 @@ export function ProfileForm({ userId, profile, page }: ProfileFormProps) {
             <div className="space-y-2">
               <Label htmlFor="username">Username</Label>
               <div className="flex">
-                <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
-                  linkhaven.vercel.app/
+                <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-300 text-sm">
+                  linkhaven.app/
                 </span>
                 <Input
                   id="username"

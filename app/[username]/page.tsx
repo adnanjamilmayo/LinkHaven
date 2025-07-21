@@ -3,60 +3,72 @@ import { BioPage } from "@/components/bio-page/bio-page"
 import { notFound } from "next/navigation"
 
 interface PageProps {
-  params: Promise<{ username: string }>
+  params: { username: string }
 }
 
 export default async function PublicBioPage({ params }: PageProps) {
-  const { username } = await params
+  const resolvedParams = await params;
+  const { username } = resolvedParams;
   const supabase = await createServerClient()
 
   // Get page data
-  const { data: page } = await supabase.from("pages").select("*").eq("username", username).single()
-
+  const { data: page, error: pageError } = await supabase.from("pages").select("*").eq("username", username as any).single()
+  
+  if (pageError) {
+    notFound()
+  }
+  
   if (!page) {
     notFound()
   }
 
-  // Get user profile
-  const { data: profile } = await supabase.from("user_profiles").select("*").eq("id", page.user_id).single()
+  // Type assertion for page
+  const validPage = page as any;
 
-  if (!profile) {
+  // Get user profile
+  const { data: profile, error: profileError } = await supabase.from("user_profiles").select("*").eq("id", validPage.user_id as any).single()
+  if (profileError || !profile) {
     notFound()
   }
 
   // Get active links
-  const { data: links } = await supabase
+  const { data: links, error: linksError } = await supabase
     .from("links")
     .select("*")
-    .eq("page_id", page.id)
-    .eq("is_active", true)
+    .eq("page_id", validPage.id as any)
+    .eq("is_active", true as any)
     .order("sort_order", { ascending: true })
+  if (linksError) {
+    notFound()
+  }
 
   // Increment page views
-  await supabase.rpc("increment_page_views", { page_uuid: page.id })
+  await supabase.rpc("increment_page_views", { page_uuid: validPage.id as any })
 
-  return <BioPage page={page} links={links || []} profile={profile!} />
+  return <BioPage page={validPage} links={links as any || []} profile={profile as any} />
 }
 
 export async function generateMetadata({ params }: PageProps) {
-  const { username } = await params
+  const resolvedParams = await params;
+  const { username } = resolvedParams;
   const supabase = await createServerClient()
 
-  const { data: page } = await supabase.from("pages").select("*, user_profiles(*)").eq("username", username).single()
-
-  if (!page) {
+  const { data: page, error: pageError } = await supabase.from("pages").select("*, user_profiles(*)").eq("username", username as any).single()
+  if (pageError || !page) {
     return {
       title: "Page Not Found - LinkHaven",
     }
   }
 
+  const validPage = page as any;
+
   return {
-    title: `${page.user_profiles?.full_name || username} - LinkHaven`,
-    description: page.bio || `Check out ${username}'s links on LinkHaven`,
+    title: `${validPage.user_profiles?.full_name || username} - LinkHaven`,
+    description: validPage.bio || `Check out ${username}'s links on LinkHaven`,
     openGraph: {
-      title: `${page.user_profiles?.full_name || username} - LinkHaven`,
-      description: page.bio || `Check out ${username}'s links on LinkHaven`,
-      images: page.profile_image_url ? [page.profile_image_url] : [],
+      title: `${validPage.user_profiles?.full_name || username} - LinkHaven`,
+      description: validPage.bio || `Check out ${username}'s links on LinkHaven`,
+      images: validPage.profile_image_url ? [validPage.profile_image_url] : [],
     },
   }
 }

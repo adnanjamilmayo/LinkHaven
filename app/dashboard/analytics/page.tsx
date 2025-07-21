@@ -8,7 +8,7 @@ export default async function AnalyticsPage() {
   const page = await getUserPage(user.id)
   const supabase = await createServerClient()
 
-  if (!page) {
+  if (!page || typeof page !== "object" || !("id" in page)) {
     return (
       <div className="p-8">
         <Card>
@@ -21,29 +21,39 @@ export default async function AnalyticsPage() {
     )
   }
 
+  // Type assertion to tell TypeScript page is valid
+  const validPage = page as { id: string; username: string };
+
   // Get analytics data
-  const { data: analytics } = await supabase
+  const { data: analytics, error: analyticsError } = await supabase
     .from("analytics")
     .select("*")
-    .eq("page_id", page.id)
+    .eq("page_id", validPage.id as any)
     .order("view_date", { ascending: false })
     .limit(30)
 
-  const { data: links } = await supabase
+  const { data: links, error: linksError } = await supabase
     .from("links")
     .select("title, click_count, url")
-    .eq("page_id", page.id)
+    .eq("page_id", validPage.id as any)
     .order("click_count", { ascending: false })
 
-  const totalViews = analytics?.reduce((sum, day) => sum + day.views, 0) || 0
-  const totalClicks = links?.reduce((sum, link) => sum + link.click_count, 0) || 0
+  if (analyticsError || !Array.isArray(analytics)) {
+    return <div>Error loading analytics</div>;
+  }
+  if (linksError || !Array.isArray(links)) {
+    return <div>Error loading links</div>;
+  }
+
+  const totalViews = (analytics as any).reduce((sum: number, day: any) => sum + day.views, 0) || 0
+  const totalClicks = (links as any).reduce((sum: number, link: any) => sum + link.click_count, 0) || 0
   const avgClickRate = totalViews > 0 ? ((totalClicks / totalViews) * 100).toFixed(1) : "0"
 
   return (
     <div className="p-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Analytics</h1>
-        <p className="text-gray-600 mt-2">Track your page performance and link engagement</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Analytics</h1>
+        <p className="text-gray-600 dark:text-gray-300 mt-2">Track your page performance and link engagement</p>
       </div>
 
       {/* Overview Stats */}
@@ -87,7 +97,7 @@ export default async function AnalyticsPage() {
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{links?.length || 0}</div>
+            <div className="text-2xl font-bold">{(links as any).length || 0}</div>
             <p className="text-xs text-muted-foreground">Links on your page</p>
           </CardContent>
         </Card>
@@ -102,13 +112,13 @@ export default async function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {analytics?.slice(0, 10).map((day) => (
+              {(analytics as any).slice(0, 10).map((day: any) => (
                 <div key={day.view_date} className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">{new Date(day.view_date).toLocaleDateString()}</span>
                   <span className="font-medium">{day.views} views</span>
                 </div>
               ))}
-              {!analytics?.length && <p className="text-gray-500 text-center py-4">No views yet</p>}
+              {!(analytics as any).length && <p className="text-gray-500 text-center py-4">No views yet</p>}
             </div>
           </CardContent>
         </Card>
@@ -121,7 +131,7 @@ export default async function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {links?.slice(0, 10).map((link) => (
+              {(links as any).slice(0, 10).map((link: any) => (
                 <div key={link.title} className="flex justify-between items-center">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 truncate">{link.title}</p>
@@ -130,7 +140,7 @@ export default async function AnalyticsPage() {
                   <span className="ml-2 font-medium">{link.click_count} clicks</span>
                 </div>
               ))}
-              {!links?.length && <p className="text-gray-500 text-center py-4">No links yet</p>}
+              {!(links as any).length && <p className="text-gray-500 text-center py-4">No links yet</p>}
             </div>
           </CardContent>
         </Card>
