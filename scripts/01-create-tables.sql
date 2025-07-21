@@ -101,6 +101,10 @@ CREATE POLICY "Users can manage own links" ON public.links
 CREATE POLICY "Anyone can view active links" ON public.links
   FOR SELECT USING (is_active = true);
 
+-- Allow anyone to update links (for increment_link_clicks)
+CREATE POLICY "Anyone can update links" ON public.links
+  FOR UPDATE USING (true);
+
 -- RLS Policies for analytics
 CREATE POLICY "Users can view own analytics" ON public.analytics
   FOR SELECT USING (
@@ -113,6 +117,10 @@ CREATE POLICY "Users can view own analytics" ON public.analytics
 
 CREATE POLICY "Anyone can insert analytics" ON public.analytics
   FOR INSERT WITH CHECK (true);
+
+-- Allow anyone to update analytics (for increment_page_views)
+CREATE POLICY "Anyone can update analytics" ON public.analytics
+  FOR UPDATE USING (true);
 
 -- Function to handle user profile creation
 CREATE OR REPLACE FUNCTION public.handle_new_user()

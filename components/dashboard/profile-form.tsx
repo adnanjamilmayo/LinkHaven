@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import type { Database } from "@/lib/supabase/types"
+import { useToast } from "@/hooks/use-toast"
 
 type Profile = Database["public"]["Tables"]["user_profiles"]["Row"]
 type Page = Database["public"]["Tables"]["pages"]["Row"]
@@ -26,10 +27,14 @@ export function ProfileForm({ userId, profile, page }: ProfileFormProps) {
   const [imageFile, setImageFile] = useState<File | null>(null)
   const router = useRouter()
   const supabase = createClient()
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+  const { toast } = useToast()
 
   const handleSubmit = async (formData: FormData) => {
     setIsLoading(true)
-
+    setError(null)
+    setSuccess(null)
     try {
       const fullName = formData.get("fullName") as string
       const username = formData.get("username") as string
@@ -37,11 +42,17 @@ export function ProfileForm({ userId, profile, page }: ProfileFormProps) {
       const template = formData.get("template") as string
 
       // Update profile
-      await supabase.from("user_profiles").upsert({
+      const { error: profileError } = await supabase.from("user_profiles").upsert({
         id: userId,
         full_name: fullName,
         email: profile?.email || "",
       })
+      if (profileError) {
+        setError("Failed to update profile info.")
+        toast({ title: "Error", description: "Failed to update profile info." })
+        setIsLoading(false)
+        return
+      }
 
       let profileImageUrl = page?.profile_image_url
 
@@ -52,15 +63,20 @@ export function ProfileForm({ userId, profile, page }: ProfileFormProps) {
 
         const { error: uploadError } = await supabase.storage.from("profile-images").upload(fileName, imageFile)
 
-        if (!uploadError) {
+        if (uploadError) {
+          setError("Image upload failed. Please try again.")
+          toast({ title: "Error", description: "Image upload failed. Please try again." })
+          setIsLoading(false)
+          return
+        } else {
           const { data } = supabase.storage.from("profile-images").getPublicUrl(fileName)
-
           profileImageUrl = data.publicUrl
+          console.log("Image uploaded. Public URL:", profileImageUrl)
         }
       }
 
       // Update or create page
-      await supabase.from("pages").upsert({
+      const { error: pageError } = await supabase.from("pages").upsert({
         id: page?.id,
         user_id: userId,
         username,
@@ -68,9 +84,22 @@ export function ProfileForm({ userId, profile, page }: ProfileFormProps) {
         template: template as "creator" | "shop" | "coach",
         profile_image_url: profileImageUrl,
       })
+      if (pageError) {
+        setError("Failed to update page info.")
+        toast({ title: "Error", description: "Failed to update page info." })
+        setIsLoading(false)
+        return
+      } else {
+        setSuccess("Profile updated successfully!")
+        toast({ title: "Success", description: "Profile updated successfully!" })
+        console.log("Page upserted. Image URL:", profileImageUrl)
+      }
 
       router.refresh()
+      window.location.reload();
     } catch (error) {
+      setError("Unexpected error occurred.")
+      toast({ title: "Error", description: "Unexpected error occurred." })
       console.error("Error updating profile:", error)
     } finally {
       setIsLoading(false)
@@ -85,13 +114,21 @@ export function ProfileForm({ userId, profile, page }: ProfileFormProps) {
           <CardDescription>Update your profile details and customize your bio page</CardDescription>
         </CardHeader>
         <CardContent>
+          {error && (
+            <div className="mb-4 text-red-600 dark:text-red-400 font-medium">{error}</div>
+          )}
+          {success && (
+            <div className="mb-4 text-green-600 dark:text-green-400 font-medium">{success}</div>
+          )}
           <form action={handleSubmit} className="space-y-6">
             {/* Profile Image */}
             <div className="space-y-2">
               <Label>Profile Image</Label>
               <div className="flex items-center space-x-4">
                 <Avatar className="w-16 h-16">
-                  <AvatarImage src={page?.profile_image_url || ""} />
+                  <AvatarImage 
+                    src={page?.profile_image_url ? page.profile_image_url + '?t=' + Date.now() : ""}
+                  />
                   <AvatarFallback>{profile?.full_name?.charAt(0) || "U"}</AvatarFallback>
                 </Avatar>
                 <Input

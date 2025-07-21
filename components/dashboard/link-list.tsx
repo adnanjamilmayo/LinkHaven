@@ -164,7 +164,7 @@ export function LinkList({ links, pageId }: LinkListProps) {
               </Button>
 
               <Button variant="ghost" size="sm" asChild>
-                <a href={link.url} target="_blank" rel="noopener noreferrer">
+                <a href={`/api/link-click/${link.id}`} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="h-4 w-4" />
                 </a>
               </Button>

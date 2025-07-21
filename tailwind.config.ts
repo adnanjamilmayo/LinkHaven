@@ -62,6 +62,16 @@ const config: Config = {
   				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
   				border: 'hsl(var(--sidebar-border))',
   				ring: 'hsl(var(--sidebar-ring))'
+  			},
+  			// Custom LinkHaven brand colors
+  			linkhaven: {
+  				lavender: '#E6E6FA',
+  				'ocean-blue': '#4F86C6',
+  				'pastel-pink': '#FFB6C1',
+  				'gradient-1': '#667eea',
+  				'gradient-2': '#764ba2',
+  				'gradient-3': '#f093fb',
+  				'gradient-4': '#f5576c',
   			}
   		},
   		borderRadius: {
@@ -85,11 +95,45 @@ const config: Config = {
   				to: {
   					height: '0'
   				}
+  			},
+  			'float': {
+  				'0%, 100%': {
+  					transform: 'translateY(0px)'
+  				},
+  				'50%': {
+  					transform: 'translateY(-10px)'
+  				}
+  			},
+  			'glow': {
+  				'0%, 100%': {
+  					boxShadow: '0 0 20px rgba(102, 126, 234, 0.3)'
+  				},
+  				'50%': {
+  					boxShadow: '0 0 30px rgba(102, 126, 234, 0.6)'
+  				}
+  			},
+  			'gradient-shift': {
+  				'0%, 100%': {
+  					backgroundPosition: '0% 50%'
+  				},
+  				'50%': {
+  					backgroundPosition: '100% 50%'
+  				}
   			}
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
-  			'accordion-up': 'accordion-up 0.2s ease-out'
+  			'accordion-up': 'accordion-up 0.2s ease-out',
+  			'float': 'float 6s ease-in-out infinite',
+  			'glow': 'glow 2s ease-in-out infinite',
+  			'gradient-shift': 'gradient-shift 8s ease infinite'
+  		},
+  		backgroundImage: {
+  			'glassmorphism': 'linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))',
+  			'premium-gradient': 'linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #667eea 100%)',
+  			'lavender-gradient': 'linear-gradient(135deg, #E6E6FA 0%, #D8BFD8 50%, #E6E6FA 100%)',
+  			'ocean-gradient': 'linear-gradient(135deg, #4F86C6 0%, #6B8E23 50%, #4F86C6 100%)',
+  			'pink-gradient': 'linear-gradient(135deg, #FFB6C1 0%, #FFC0CB 50%, #FFB6C1 100%)'
   		}
   	}
   },

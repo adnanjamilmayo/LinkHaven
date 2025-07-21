@@ -56,7 +56,7 @@ export async function generateMetadata({ params }: PageProps) {
   const { data: page, error: pageError } = await supabase.from("pages").select("*, user_profiles(*)").eq("username", username as any).single()
   if (pageError || !page) {
     return {
-      title: "Page Not Found - LinkHaven",
+      title: `${username} - LinkHaven`,
     }
   }
 
