@@ -35,8 +35,8 @@ export default async function DashboardPage() {
   if (analyticsError || !Array.isArray(analytics)) return <div>Error loading analytics</div>;
   if (linksError || !Array.isArray(links)) return <div>Error loading links</div>;
 
+  // Remove totalClicks and click rate logic
   const totalViews = (analytics as any).reduce((sum: number, day: any) => sum + day.views, 0) || 0
-  const totalClicks = (links as any).reduce((sum: number, link: any) => sum + link.click_count, 0) || 0
   const totalLinks = (links as any).length || 0
 
   return (
@@ -72,18 +72,6 @@ export default async function DashboardPage() {
                 <p className="text-xs text-muted-foreground">Page views this month</p>
               </CardContent>
             </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Clicks</CardTitle>
-                <MousePointer className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{totalClicks}</div>
-                <p className="text-xs text-muted-foreground">Link clicks this month</p>
-              </CardContent>
-            </Card>
-
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Active Links</CardTitle>
@@ -92,19 +80,6 @@ export default async function DashboardPage() {
               <CardContent>
                 <div className="text-2xl font-bold">{totalLinks}</div>
                 <p className="text-xs text-muted-foreground">Links on your page</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Click Rate</CardTitle>
-                <BarChart3 className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {totalViews > 0 ? Math.round((totalClicks / totalViews) * 100) : 0}%
-                </div>
-                <p className="text-xs text-muted-foreground">Clicks per view</p>
               </CardContent>
             </Card>
           </div>
@@ -140,7 +115,7 @@ export default async function DashboardPage() {
                 <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-md mb-3">
                   <code className="text-sm text-gray-900 dark:text-gray-100">linkhaven.app/{validPage.username}</code>
                 </div>
-                <CopyLinkButton link={`linkhaven.app/${validPage.username}`} />
+                <CopyLinkButton link={`${process.env.NEXT_PUBLIC_SITE_URL}/${validPage.username}`} />
               </CardContent>
             </Card>
           </div>

@@ -45,9 +45,8 @@ export default async function AnalyticsPage() {
     return <div>Error loading links</div>;
   }
 
+  // Remove totalClicks and click rate logic
   const totalViews = (analytics as any).reduce((sum: number, day: any) => sum + day.views, 0) || 0
-  const totalClicks = (links as any).reduce((sum: number, link: any) => sum + link.click_count, 0) || 0
-  const avgClickRate = totalViews > 0 ? ((totalClicks / totalViews) * 100).toFixed(1) : "0"
 
   return (
     <div className="p-8">
@@ -68,29 +67,6 @@ export default async function AnalyticsPage() {
             <p className="text-xs text-muted-foreground">All time page views</p>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Clicks</CardTitle>
-            <MousePointer className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalClicks}</div>
-            <p className="text-xs text-muted-foreground">All time link clicks</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Click Rate</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{avgClickRate}%</div>
-            <p className="text-xs text-muted-foreground">Average click-through rate</p>
-          </CardContent>
-        </Card>
-
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Links</CardTitle>
